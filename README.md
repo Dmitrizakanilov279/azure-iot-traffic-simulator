@@ -1,6 +1,6 @@
-# Azure IoT Traffic & Environmental Simulator
+# Azure IoT Traffic Simulator
 
-A Python-based Azure IoT Hub device simulator designed for real-time traffic monitoring, congestion pattern modeling, and PM2.5 emissions analytics aligned with ESG (Environmental, Social, and Governance) engineering principles.
+A dual-mode Python IoT device simulator designed for real-time traffic velocity monitoring and congestion detection. The system operates seamlessly in both a **Standalone Local Mock Mode** for offline testing and an **Azure IoT Hub Production Mode** for real-time Cloud telemetry streaming.
 
 ---
 
@@ -8,61 +8,87 @@ A Python-based Azure IoT Hub device simulator designed for real-time traffic mon
 
 ```mermaid
 graph TD
-    A[Traffic Telemetry Generator] -->|MQTT / AMQP Protocol| B[Azure IoT Hub Ingestion]
-    B -->|Stream Analytics| C{Data Processing}
-    C -->|Real-time Stream| D[Azure Event Hubs / Stream Analytics]
-    C -->|Cold Storage| E[(Azure Blob Storage / SQL DB)]
-    D --> F[ESG Emissions & Traffic Dashboard]
+    A[Traffic Telemetry Engine] -->|Check Connection String| B{Execution Mode}
+    B -->|Default / No Credentials| C[Local Mock Mode]
+    B -->|Valid Connection String| D[Azure IoT Hub Mode]
+    
+    C -->|Console Logger| E[Real-time JSON Terminal Output]
+    C -->|Velocity Threshold < 15 km/h| F[🚨 Congestion Alert Engine]
+    
+    D -->|Azure SDK / MQTT| G[Azure IoT Hub Ingestion]
 ```
 
 ---
 
-## ⚙️ Setup & Configuration
+## ✨ Key Features
 
-### Prerequisites
-* Python 3.10+
-* Azure IoT Hub Instance & Device Connection String
+* **Dual-Mode Execution Architecture:** Auto-fallback to Local Mock Mode when Azure credentials are missing, allowing zero-dependency testing and offline demonstration.
+* **Real-time Velocity Modeling:** Simulates dynamic vehicle acceleration and deceleration using random uniform delta steps.
+* **Congestion Alert Threshold:** Detects traffic bottlenecks and triggers real-time alerts when vehicle velocity drops below $15\text{ km/h}$.
+* **Clean JSON Payload Serialization:** Exports telemetry structured with device identification, speed metrics, and timestamps.
+* **Graceful Interrupt Handling:** Captures `KeyboardInterrupt` (`Ctrl+C`) to clean up client sockets and execution loops safely.
+
+---
+
+## ⚙️ Prerequisites & Setup
+
+### Requirements
+* **OS:** Linux / Pop!_OS / macOS / Windows
+* **Python:** 3.8+
+* **Dependencies:** `azure-iot-device` *(Optional: Required only when connecting to live Azure IoT Hub)*
 
 ### Installation
 ```bash
+# Clone the repository
 git clone [https://github.com/Dmitrizakanilov279/azure-iot-traffic-simulator.git](https://github.com/Dmitrizakanilov279/azure-iot-traffic-simulator.git)
 cd azure-iot-traffic-simulator
 
+# Set up virtual environment
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-```
 
-### Environment Configuration
-Create a `.env` file in the root directory:
-```env
-IOTHUB_DEVICE_CONNECTION_STRING="HostName=YOUR_HUB.azure-devices.net;DeviceId=TrafficSensor01;SharedAccessKey=YOUR_KEY"
-SIMULATION_INTERVAL_SECONDS=5
+# Install Azure IoT SDK (Optional for Azure mode)
+pip install azure-iot-device
 ```
 
 ---
 
-## 💻 Execution & Payload Schema
+## 💻 Configuration & Execution
 
-### Run Simulator
+### 1. Running in Local Mock Mode (Default)
+Keep `CONNECTION_STRING = "YOUR_DEVICE_CONNECTION_STRING_HERE"` in the script and execute directly:
+
 ```bash
 python simulator.py
 ```
 
-### Generated Telemetry Payload
+### 2. Running in Azure IoT Hub Mode
+Update the connection string variable in `simulator.py` with your Azure IoT device credentials:
+
+```python
+CONNECTION_STRING = "HostName=YOUR_HUB.azure-devices.net;DeviceId=SmartTrafficSimulated;SharedAccessKey=YOUR_KEY"
+```
+
+---
+
+## 📊 Telemetry Output Schema
+
+### Local Console Output Example
 ```json
 {
-  "device_id": "TrafficSensor01",
-  "timestamp": "2026-10-31T08:15:30Z",
-  "location": {
-    "latitude": 13.7563,
-    "longitude": 100.5018
-  },
-  "metrics": {
-    "vehicle_count_per_min": 142,
-    "average_speed_kmh": 34.2,
-    "pm2_5_ug_m3": 48.6,
-    "co2_estimate_kg": 12.4
-  }
+  "deviceId": "SmartTrafficSimulated",
+  "current_velocity_kmh": 12.45,
+  "timestamp": "2026-10-31 09:12:00"
 }
 ```
+
+When velocity drops below $15.0\text{ km/h}$, the local alert system triggers:
+```text
+🚨 [ALERT] ตรวจพบการจราจรติดขัด! ความเร็วต่ำกว่าเกณฑ์
+```
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for details.
