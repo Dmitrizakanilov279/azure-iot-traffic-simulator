@@ -1,25 +1,68 @@
-# Azure IoT Hub: Traffic & Environment Monitoring Simulator 🚦☁️
+# Azure IoT Traffic & Environmental Simulator
 
-## Overview
-This repository contains a device simulator for pushing real-time telemetry data, acting as a foundational infrastructure test for the "Secret Traffic Information" (ข้อมูลลับ จราจรไทย) initiative. 
+A Python-based Azure IoT Hub device simulator designed for real-time traffic monitoring, congestion pattern modeling, and PM2.5 emissions analytics aligned with ESG (Environmental, Social, and Governance) engineering principles.
 
-The ultimate goal of this system is to predict traffic congestion, reduce vehicle idle times, and mitigate PM2.5 pollution emissions. This project strictly aligns with SDG and ESG principles, focusing on sustainable and positive-sum public infrastructure.
+---
 
-## Architecture Concept
-Based on the project blueprint, the full physical architecture includes:
-* **Edge Devices:** Raspberry Pi 5 acting as the core IoT node.
-* **Sensors:** LiDAR (for object detection) and LC76G GNSS Module (for high-accuracy routing).
-* **Cloud Platform:** Microsoft Azure (IoT Hub, Stream Analytics, Azure AI).
+## 🏗️ System Architecture
 
-*Note: This repository currently demonstrates the Cloud-to-Device and Device-to-Cloud communication logic in a Local Mock Mode before physical hardware deployment.*
+```mermaid
+graph TD
+    A[Traffic Telemetry Generator] -->|MQTT / AMQP Protocol| B[Azure IoT Hub Ingestion]
+    B -->|Stream Analytics| C{Data Processing}
+    C -->|Real-time Stream| D[Azure Event Hubs / Stream Analytics]
+    C -->|Cold Storage| E[(Azure Blob Storage / SQL DB)]
+    D --> F[ESG Emissions & Traffic Dashboard]
+```
 
-## Tech Stack
-* Python 3
-* Azure IoT Device SDK (Simulated)
-* JSON Data Pipeline
+---
 
-## Contact
-**Benjarong Nuankeaw**
-Technocrat | Infrastructure & Data Analytics
-https://www.facebook.com/Benjarongpplenuankeaw/?locale=th_TH
-https://www.linkedin.com/in/benjarong-nuankeaw/
+## ⚙️ Setup & Configuration
+
+### Prerequisites
+* Python 3.10+
+* Azure IoT Hub Instance & Device Connection String
+
+### Installation
+```bash
+git clone [https://github.com/Dmitrizakanilov279/azure-iot-traffic-simulator.git](https://github.com/Dmitrizakanilov279/azure-iot-traffic-simulator.git)
+cd azure-iot-traffic-simulator
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Environment Configuration
+Create a `.env` file in the root directory:
+```env
+IOTHUB_DEVICE_CONNECTION_STRING="HostName=YOUR_HUB.azure-devices.net;DeviceId=TrafficSensor01;SharedAccessKey=YOUR_KEY"
+SIMULATION_INTERVAL_SECONDS=5
+```
+
+---
+
+## 💻 Execution & Payload Schema
+
+### Run Simulator
+```bash
+python simulator.py
+```
+
+### Generated Telemetry Payload
+```json
+{
+  "device_id": "TrafficSensor01",
+  "timestamp": "2026-10-31T08:15:30Z",
+  "location": {
+    "latitude": 13.7563,
+    "longitude": 100.5018
+  },
+  "metrics": {
+    "vehicle_count_per_min": 142,
+    "average_speed_kmh": 34.2,
+    "pm2_5_ug_m3": 48.6,
+    "co2_estimate_kg": 12.4
+  }
+}
+```
